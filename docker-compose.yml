@@ -1,0 +1,28 @@
+# Local development stack. Redis is intentionally absent: it is added in the phase that needs it (publishing queue).
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 10
+  backend:
+    build: ./backend
+    depends_on:
+      postgres: {condition: service_healthy}
+    environment:
+      SAAS_PG_ADMIN_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/postgres
+      SAAS_CONTROL_DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@postgres:5432/saas_control
+      SAAS_TENANT_DB_HOST: postgres
+      SAAS_TENANT_DB_PORT: "5432"
+      SAAS_SECRETS_KEY: ${SAAS_SECRETS_KEY:?generate with the command in .env.example}
+    command: sh -c "python -m app.cli init-control && uvicorn app.main:create_app --factory --host 0.0.0.0 --port 8000"
+  frontend:
+    build: ./frontend
+    depends_on: [backend]
+    ports: ["8080:80"]
+volumes:
+  pgdata:

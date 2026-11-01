@@ -1,0 +1,35 @@
+__pycache__/
+*.pyc
+.env
+node_modules/
+frontend/dist/
+.pytest_cache/
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Node.js
+node_modules/
+frontend/dist/
+
+# Logs
+*.log
+
+# Database backups
+*.sql
+*.dump
+
+# IDE
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
